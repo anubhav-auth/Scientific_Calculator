@@ -18,5 +18,6 @@ class sharedStateViewModel: ViewModel() {
     var inverseState by mutableStateOf(true)
     var element by mutableStateOf("")
     var answer by mutableStateOf("")
+    var equalClicked by mutableStateOf(false)
 
 }

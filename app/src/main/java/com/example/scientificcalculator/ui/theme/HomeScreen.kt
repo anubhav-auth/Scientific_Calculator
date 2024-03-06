@@ -13,6 +13,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -42,7 +43,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -65,33 +69,44 @@ fun HomeScreen() {
             Spring.DampingRatioHighBouncy
         )
     )
-
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
-            .background(BackgroundCal)
             .fillMaxSize()
     ) {
-        Column {
-            display()
-            sciKeyPad(ButtonSize = if (viewModel.swapState) 75.dp else 62.dp, rowSize = state)
-        }
+        val height = constraints.maxHeight
+        val width = constraints.maxWidth
+        val gradient = Brush.linearGradient(
+            colors = listOf(GradColor1, GradColor2, GradColor1),
+            start = Offset(width * 0f, height * 0f),
+            end = Offset(width * 0.8f, height * 0.8f)
+        )
+        Box(
+            modifier = Modifier
+                .background(gradient)
+                .fillMaxSize()
+        ) {
+            Column {
+                display()
+                sciKeyPad(ButtonSize = if (viewModel.swapState) 75.dp else 62.dp, rowSize = state)
+            }
 
+        }
     }
 
 }
 
-
 @Composable
 fun display() {
     val viewModel: sharedStateViewModel = viewModel()
+    var interactionSource = remember { MutableInteractionSource() }
 
     Card(
         modifier = Modifier
             .size(400.dp)
             .padding(top = 50.dp, start = 15.dp, end = 15.dp, bottom = 15.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(DisplayColor),
-        elevation = CardDefaults.cardElevation(500.dp),
+        colors = CardDefaults.cardColors(Color.Transparent),
+//        elevation = CardDefaults.cardElevation(500.dp),
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             BoxWithConstraints(
@@ -101,14 +116,16 @@ fun display() {
                 val height = constraints.maxHeight
                 val width = constraints.maxWidth
                 val gradient = Brush.linearGradient(
-                    colors = listOf(DisplayColor, GradColor),
+                    colors = listOf(Color.Transparent, GradColor2),
                     start = Offset(width * 0.3f, height * 0.7f),
                     end = Offset(width * 1f, height * 0f)
                 )
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(brush = gradient)
+                        .background(gradient)
+                        .shadow(400.dp, RoundedCornerShape(20.dp), ambientColor = Color.Black,)
+                        .blur(30.dp)
                 )
             }
 
@@ -119,7 +136,7 @@ fun display() {
                     modifier = Modifier
                         .padding(top = 13.dp, start = 22.dp)
                         .clickable { },
-                    tint = Color.White,
+                    tint = Color.Black,
 
                     )
                 Column(
@@ -150,10 +167,10 @@ fun display() {
                                     viewModel.inverseState = true
                                 },
                             textAlign = TextAlign.Center,
-                            text = if (viewModel.swapState) "Norm"
-                            else "Sci",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
+                            text = if (viewModel.swapState) "Sci"
+                            else "Norm",
+                            color = Color.Black,
+                            fontWeight = FontWeight.ExtraBold,
                             style = MaterialTheme.typography.titleLarge
                         )
                         Text(
@@ -170,8 +187,8 @@ fun display() {
                                         if (viewModel.angleUnitState || !viewModel.inverseState) "Deg"
                                         else "Rad"
                                          },
-                            color = if(viewModel.swapState || !viewModel.inverseState) Color.DarkGray
-                                    else Color.White,
+                            color = if(viewModel.swapState || !viewModel.inverseState) Color.Gray
+                                    else Color.Black,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleLarge
 
@@ -192,21 +209,25 @@ fun display() {
                                 .clickable {
                                     viewModel.element = ""
                                     viewModel.answer = ""
-                                           },
+                                    viewModel.equalClicked = false
+                                },
                             textAlign = TextAlign.End,
                             text = "AC",
-                            color = ClearOperator,
-                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFFF9F871),//ClearOperator,
+                            fontWeight = FontWeight.SemiBold,
                             style = MaterialTheme.typography.headlineLarge
                         )
                         Text(
                             modifier = Modifier
                                 .padding(top = 5.dp, end = 30.dp)
-                                .clickable { viewModel.element = viewModel.element.dropLast(1) },
+                                .clickable {
+
+                                    viewModel.element = viewModel.element.dropLast(1)
+                                    viewModel.equalClicked = false},
                             textAlign = TextAlign.End,
                             text = "C",
-                            color = ClearOperator,
-                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFFF9F871),//ClearOperator,
+                            fontWeight = FontWeight.SemiBold,
                             style = MaterialTheme.typography.headlineLarge
 
                         )
@@ -220,11 +241,7 @@ fun display() {
                 .fillMaxSize()
             ){
                 Column (modifier = Modifier.fillMaxSize()){
-                    Row (modifier = Modifier
-                        .weight(0.4f)
-                        .fillMaxSize()
-                    ){
-                    }
+
                     Row (modifier = Modifier
                         .weight(0.6f)
                         .fillMaxSize()
@@ -233,23 +250,34 @@ fun display() {
                     ){
                         Column (horizontalAlignment = Alignment.End){
                             Text(
-                                modifier = Modifier.weight(1f).fillMaxSize(),
+                                modifier = Modifier
+                                    .weight(0.64f)
+                                    .fillMaxSize(),
                                 text = viewModel.element,
+                                fontWeight = if (!viewModel.equalClicked)FontWeight.SemiBold
+                                else FontWeight.Normal,
                                 textAlign = TextAlign.Right,
-                                fontSize = 25.sp,
-                                color = ButtonTextColor
+                                fontSize = if (!viewModel.equalClicked)30.sp
+                                            else 25.sp,
+                                color = if (!viewModel.equalClicked) ButtonTextColor
+                                            else Color.DarkGray
                             )
                             Spacer(modifier = Modifier.size(10.dp))
                             Text(
-                                modifier = Modifier.weight(1f).fillMaxSize(),
+                                modifier = Modifier
+                                    .weight(0.36f)
+                                    .fillMaxSize(),
                                 text = viewModel.answer,
+                                fontWeight = if (viewModel.equalClicked)FontWeight.SemiBold
+                                            else FontWeight.Normal,
                                 textAlign = TextAlign.Right,
-                                fontSize = 25.sp,
-                                color = ButtonTextColor
+                                fontSize = if (viewModel.equalClicked)35.sp
+                                            else 25.sp,
+                                color = if (viewModel.equalClicked) ButtonTextColor
+                                else Color.DarkGray
                             )
                         }
-
-                    }
+                        }
                 }
             }
 
@@ -329,7 +357,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                     }
 
                     Button(
-                        onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "^" },
+                        onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "^"
+                            if (viewModel.equalClicked) viewModel.equalClicked = false},
                         contentPadding = PaddingValues(horizontal = 0.dp),
                         modifier = Modifier
                             .size(scaleButton.value),
@@ -350,7 +379,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                     }
 
                     Button(
-                        onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "√" },
+                        onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "√"
+                            if (viewModel.equalClicked) viewModel.equalClicked = false},
                         contentPadding = PaddingValues(horizontal = 0.dp),
                         modifier = Modifier
                             .size(scaleButton.value),
@@ -370,7 +400,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                         )
                     }
                     Button(
-                        onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "!" },
+                        onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "!"
+                            if (viewModel.equalClicked) viewModel.equalClicked = false},
                         contentPadding = PaddingValues(horizontal = 0.dp),
                         modifier = Modifier
                             .size(scaleButton.value),
@@ -392,7 +423,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                     Button(
-                        onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "π" },
+                        onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "π"
+                            if (viewModel.equalClicked) viewModel.equalClicked = false},
                         contentPadding = PaddingValues(horizontal = 0.dp),
                         modifier = Modifier
                             .size(scaleButton.value),
@@ -414,7 +446,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                     Button(
-                        onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "ln(" },
+                        onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "ln("
+                            if (viewModel.equalClicked) viewModel.equalClicked = false},
                         contentPadding = PaddingValues(horizontal = 0.dp),
                         modifier = Modifier
                             .size(scaleButton.value),
@@ -449,7 +482,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                 if (!viewModel.swapState) {
                     Button(
                         onClick = {
-                            if (viewModel.element.length < maxNoOfElements)viewModel.element += "lg(" },
+                            if (viewModel.element.length < maxNoOfElements)viewModel.element += "lg("
+                            if (viewModel.equalClicked) viewModel.equalClicked = false},
                         contentPadding = PaddingValues(horizontal = 0.dp),
                         modifier = Modifier
                             .size(scaleButton.value),
@@ -471,7 +505,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                 }
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "(" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "("
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
@@ -493,12 +528,13 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "7" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "7"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(NumButtonColor),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -513,12 +549,13 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                     )
                 }
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "4" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "4"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(NumButtonColor),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -535,12 +572,13 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "1" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "1"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(NumButtonColor),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -562,12 +600,17 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                             viewModel.element += if (viewModel.swapState) "00"
                                                     else "e"
                             }
+
+                        if (viewModel.equalClicked) viewModel.equalClicked = false
                               },
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(
+                        if (!viewModel.swapState)ButtonColor
+                        else NumButtonColor
+                    ),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -606,6 +649,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                                     viewModel.element += "asin("
                                 }
                             }
+
+                            if (viewModel.equalClicked) viewModel.equalClicked = false
                         },
                         contentPadding = PaddingValues(horizontal = 0.dp),
                         modifier = Modifier
@@ -638,7 +683,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += ")"},
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += ")"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
@@ -660,12 +706,13 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "8" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "8"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(NumButtonColor),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -680,12 +727,13 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                     )
                 }
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "5" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "5"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(NumButtonColor),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -702,12 +750,13 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "2" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "2"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(NumButtonColor),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -724,12 +773,13 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "0" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "0"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(NumButtonColor),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -765,6 +815,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                                     viewModel.element += "acos("
                                 }
                             }
+
+                            if (viewModel.equalClicked) viewModel.equalClicked = false
                                   },
                         contentPadding = PaddingValues(horizontal = 0.dp),
                         modifier = Modifier
@@ -797,7 +849,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "%"},
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "%"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
@@ -819,12 +872,13 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "9" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "9"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(NumButtonColor),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -839,12 +893,13 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                     )
                 }
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "6" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "6"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(NumButtonColor),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -861,12 +916,13 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "3" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "3"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(NumButtonColor),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -883,7 +939,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "." },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "."
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
@@ -924,6 +981,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                                     viewModel.element += "atan("
                                 }
                             }
+
+                            if (viewModel.equalClicked) viewModel.equalClicked = false
                         },
                         contentPadding = PaddingValues(horizontal = 0.dp),
                         modifier = Modifier
@@ -955,7 +1014,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "/" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "/"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
@@ -977,7 +1037,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "*" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "*"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
@@ -997,7 +1058,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
                     )
                 }
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "-" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "-"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
@@ -1019,7 +1081,8 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "+" },
+                    onClick = { if (viewModel.element.length < maxNoOfElements)viewModel.element += "+"
+                        if (viewModel.equalClicked) viewModel.equalClicked = false},
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
@@ -1041,13 +1104,15 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
 
                 Button(
-                    onClick = { viewModel.element = viewModel.answer
+                    onClick = {
+                        viewModel.element = viewModel.answer
+                        viewModel.equalClicked = true
                               },
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     modifier = Modifier
                         .size(ButtonSize),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColor),
+                    colors = ButtonDefaults.buttonColors(Color.Black),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 8.dp,
                         pressedElevation = 0.dp
@@ -1056,7 +1121,7 @@ fun sciKeyPad(ButtonSize: Dp, rowSize: Dp) {
 
                     Text(
                         text = "=",
-                        color = ButtonTextColor,
+                        color = Color.White,
                         fontSize = 25.sp,
                         fontWeight = FontWeight.Medium
                     )
