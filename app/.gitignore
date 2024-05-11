@@ -1,7 +1,4 @@
 /build
-.build
-build/
-/src
 /release
-/.build.gradle.kts
+/build.gradle.kts
 /proguard-rules.pro
