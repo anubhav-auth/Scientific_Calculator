@@ -1,7 +1,7 @@
 # Scientific Calculator App
 
 <p align="center">
-  <img src="https://your-repository-link/assets/scientific_calculator_logo.jpg" alt="Scientific Calculator Logo" style="width: 50%; max-width: 200px; height: auto;">
+  <img src="https://github.com/anubhav-auth/Scientific_Calculator/blob/master/assets/Default_scientific_calculator_app_logo_animated_2.jpg" alt="Scientific Calculator Logo" style="width: 50%; max-width: 200px; height: auto;">
 </p>
 
 ## Overview
@@ -29,7 +29,7 @@
 ## Getting Started
 
 ### 1. Install the App
-- [Download the latest version](https://your-repository-link/releases) from the releases section.
+- [Download the latest version](https://github.com/anubhav-auth/Scientific_Calculator/releases) from the releases section.
 
 ### 2. Use the Calculator
 - Start with basic calculations, or switch to scientific mode for more complex operations.
@@ -44,13 +44,13 @@
 
 ## Demo
 
-https://your-repository-link/demo/scientific_calculator_demo.mp4
+https://github.com/user-attachments/assets/f8ab379f-8526-4310-aa0e-6552fb5f02b0
 
 ## Screenshots
 
-| Standard Mode                                                            | Scientific Mode                                                         | Trigonometric Functions                                                  |
+| Standard Mode                                                            | Scientific Mode                                                         | Deg/Rad modes                                                 |
 |---------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| ![Standard Mode][Standard-Mode-Image]  | ![Scientific Mode][Scientific-Mode-Image]  | ![Trigonometric Functions][Trigonometric-Functions-Image]  |
+| ![Standard Mode][Standard-Mode-Image]  | ![Scientific Mode][Scientific-Mode-Image]  | ![Modes][Modes-Image]  |
 
 ## Contributing
 
@@ -58,11 +58,11 @@ We welcome contributions! Please fork the repository and submit a pull request.
 
 ## License
 
-Scientific Calculator App is licensed under the [MIT License](https://your-repository-link/LICENSE.txt).
+Scientific Calculator App is licensed under the [MIT License](https://github.com/anubhav-auth/Scientific_Calculator/blob/master/LICENSE.txt).
 
 ## Contact
 
-For any questions or feedback, please reach out to [email](mailto:your-email@example.com).
+For any questions or feedback, please reach out to [email](mailto:anubhavauth@gmail.com).
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [Kotlin]: https://img.shields.io/badge/Kotlin-0095D5?style=for-the-badge&logo=kotlin&logoColor=white
@@ -70,6 +70,6 @@ For any questions or feedback, please reach out to [email](mailto:your-email@exa
 [mXparser]: https://img.shields.io/badge/mXparser-008080?style=for-the-badge&logo=calculator&logoColor=white
 [mXparser-url]: https://mathparser.org/
 
-[Standard-Mode-Image]: https://your-repository-link/assets/standard_mode_screenshot.jpg
-[Scientific-Mode-Image]: https://your-repository-link/assets/scientific_mode_screenshot.jpg
-[Trigonometric-Functions-Image]: https://your-repository-link/assets/trigonometric_functions_screenshot.jpg
+[Standard-Mode-Image]: https://github.com/anubhav-auth/Scientific_Calculator/blob/master/assets/Screenshot_2024-09-04-19-28-57-402_com.example.scientificcalculator.jpg
+[Scientific-Mode-Image]: https://github.com/anubhav-auth/Scientific_Calculator/blob/master/assets/Screenshot_2024-09-04-19-28-54-096_com.example.scientificcalculator.jpg
+[Modes-Image]: https://github.com/anubhav-auth/Scientific_Calculator/blob/master/assets/Screenshot_2024-09-04-19-29-03-119_com.example.scientificcalculator.jpg
